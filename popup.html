@@ -1,0 +1,84 @@
+<!--
+    The Exploit Database Extension for Google Chrome
+    Author: 10n1z3d <10n1z3d[at]w[dot]cn>
+    License: GPLv3
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>The Exploit Database</title>
+        <link rel="stylesheet" href="css/popup.css" type="text/css" />
+        
+        <script type="text/javascript">
+            var exploits = [];
+            var background;
+            
+            function init() {
+                background = chrome.extension.getBackgroundPage();
+                exploits = background.exploits;
+                
+                createExploitTable();
+            }
+            
+            function createExploitTable() {
+                var table = document.getElementById("exploit-table");
+                var tbody = document.createElement("tbody");
+                
+                for (x in exploits) {
+                    var exploit = exploits[x];
+                    var tr = document.createElement("tr");
+                    
+                    if (exploit["featured"]) {
+                        tr.setAttribute("class", "featured");
+                        exploit["featured"] = false;
+                    }
+                    
+                    var dateNode = document.createElement("td");
+                    dateNode.setAttribute("class", "date");
+                    dateNode.appendChild(document.createTextNode(exploit["date"]));
+                    tr.appendChild(dateNode);
+                    
+                    var titleNode = document.createElement("td");
+                    titleNode.setAttribute("class", "title");
+                    titleNode.setAttribute("onclick", "openTab('" + exploit["link"] + "');");
+                    titleNode.appendChild(document.createTextNode(exploit["title"]));
+                    tr.appendChild(titleNode);
+                    
+                    var typeNode = document.createElement("td");
+                    typeNode.setAttribute("class", "type");
+                    typeNode.setAttribute("onclick", "openTab('http://www.exploit-db.com/" + exploit["type"] + "/');");
+                    typeNode.appendChild(document.createTextNode(exploit["type"]));
+                    tr.appendChild(typeNode);
+                    
+                    var authorNode = document.createElement("td");
+                    authorNode.setAttribute("class", "author");
+                    authorNode.setAttribute("onclick", "openTab('http://www.exploit-db.com/search/?action=search&filter_author=" + exploit["author"] + "');");
+                    authorNode.appendChild(document.createTextNode(exploit["author"]));
+                    tr.appendChild(authorNode);
+                    
+                    tbody.appendChild(tr);
+                }
+                
+                table.appendChild(tbody);
+            }
+            
+            function openTab(url) {
+                chrome.tabs.create({url: url});
+            }
+        </script>
+    </head>
+    <body onload="init();" onunload="background.updateBadge();">
+        <img src="img/logo_popup.png" id="logo" alt="The Exploit Database" title="The Exploit Database" onclick="openTab('http://www.exploit-db.com/');" />
+        <table id="exploit-table">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Author</th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>

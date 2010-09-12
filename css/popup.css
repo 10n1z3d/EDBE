@@ -1,0 +1,89 @@
+/*
+    The Exploit Database Extension
+    Author: 10n1z3d <10n1z3d[at]w[dot]cn>
+    License: GPLv3
+*/
+
+body
+{
+    color: #CCC;
+	background: black url('../img/body_bg.jpg') repeat-x left top;
+	font: normal 12px "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+#logo:hover
+{
+	cursor: pointer;
+}
+
+#exploit-table
+{
+	font-size: 12px;
+	background: #000;
+	border-spacing: 2px;
+	border-collapse: separate;
+	width: 440px;
+	height: auto;
+}
+
+#exploit-table th
+{
+    color: #fff; 
+    font-weight: bold;
+}
+
+#exploit-table td
+{
+	color: #787878;
+	padding: 3px;
+    background: #131313;
+	text-align: center;
+}
+
+#exploit-table td.date
+{
+	color: #fff;
+	width: 60px;
+}
+
+#exploit-table td.title
+{
+	text-align: left;
+}
+
+#exploit-table td.author
+{
+	width: 90px;
+}
+
+#exploit-table td.title:hover
+{
+    color: #ff0000; 
+    text-decoration: underline;
+	cursor: pointer;
+}
+
+#exploit-table td.type:hover
+{
+    color: #ff0000; 
+    text-decoration: underline;
+	cursor: pointer;
+}
+
+#exploit-table td.author:hover
+{
+    color: #ff0000; 
+    text-decoration: underline;
+	cursor: pointer;
+}
+
+#exploit-table tbody tr:hover td
+{
+	background: #1a1a1a;
+	color: #fe6600;
+}
+
+#exploit-table tr.featured td
+{
+	color: #fe6600;
+}

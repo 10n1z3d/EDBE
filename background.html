@@ -1,0 +1,280 @@
+<!--
+    The Exploit Database Extension for Google Chrome
+    Author: 10n1z3d <10n1z3d[at]w[dot]cn>
+    License: GPLv3
+-->
+
+<html>
+    <head>
+        <script type="text/javascript">
+            var exploits = []; // contains newest exploits
+            var unsorted = []; // contains all exploits
+            
+            function init() {
+                if (!localStorage.updateInterval) {
+                    localStorage.updateInterval = 5;
+                }
+                
+                if (!localStorage.types) {
+                    localStorage.types = "remote:true;webapps:true;shellcode:true;local:true;dos:true;papers:true";
+                }
+                
+                chrome.browserAction.setBadgeBackgroundColor({color:[255, 102, 0, 255]});
+                
+                setTimeout(makeRequest, 3000);
+            }
+
+            function makeRequest() {
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                        parseExploits(xmlhttp.responseXML);
+                    }
+                };
+                
+                xmlhttp.open("GET", "http://www.exploit-db.com/rss.php", true);
+                xmlhttp.send(null);
+                
+                setTimeout(makeRequest, 1000 * 60 * localStorage.updateInterval);
+            }
+
+            function parseExploits(data) {
+                var items = data.getElementsByTagName("item");
+                
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    
+                    var dateNode = item.getElementsByTagName("pubDate")[0];
+                    var date = formatDate(dateNode.firstChild.data);
+                    
+                    var titleNode = item.getElementsByTagName("title")[0];
+                    var title = formatTitle(titleNode.firstChild.data);
+                    
+                    var type = titleNode.firstChild.data.split("[")[1].split("]")[0];
+                    
+                    var linkNode = item.getElementsByTagName("link")[0];
+                    var link = trimSpaces(linkNode.firstChild.data);
+                
+                    var authorNode = item.getElementsByTagName("author")[0];
+                    var author = authorNode.firstChild.data;
+
+                    var exploit = { date: date, 
+                                    title: title,
+                                    featured: false,
+                                    type: type, 
+                                    author: author, 
+                                    link: link };
+                                    
+                    unsorted[i] = exploit;
+                }
+                
+                processExploits();
+            }
+
+            function processExploits() {
+                exploits = getExploitsFromToday();
+                
+                if (exploits.length < 5) {
+                    for (x in unsorted) {
+                        var curr = unsorted[x];
+                        
+                        if (checkType(curr["type"]) 
+                            && !exploitExists(curr["link"])) {
+                            
+                            exploits.push(curr);
+                        }
+                        
+                        if (exploits.length == 5)
+                            break;
+                    }
+                } else {
+                    for (x in unsorted) {
+                        var curr = unsorted[x];
+                        
+                        if (checkDate(curr["date"]) 
+                            && checkType(curr["type"]) 
+                            && !exploitExists(curr["link"])) {
+                            
+                            curr["featured"] = true;
+                            exploits[x] = curr;
+                        }
+                        
+                        if (exploits.length == 5)
+                            break;
+                    }
+                }
+                
+                updateBadge();
+            }
+
+            function getExploitsFromToday() {
+                var temp = [];
+                
+                for (x in unsorted) {
+                    var curr = unsorted[x];
+                    
+                    if (checkDate(curr["date"]) 
+                        && checkType(curr["type"])) {
+                        
+                        curr["featured"] = true;
+                        
+                        if (exploitExists(curr["link"]) 
+                            && !isFeatured(curr["link"])) {
+                            
+                            curr["featured"] = false;
+                        }
+                        
+                        temp.push(curr);
+                    }
+                }
+                
+                return temp;
+            }
+            
+            function getTodaysCount() {
+                var count = 0;
+                
+                for (x in exploits) {
+                    var curr = exploits[x];
+                    
+                    if (checkDate(curr["date"])) {
+                        count++
+                    }
+                }
+                
+                return count;
+            }
+            
+            function getFeaturedCount()
+            {
+                var featured = 0;
+                
+                for (x in exploits) {
+                    if (exploits[x]["featured"] == true) {
+                        featured++;
+                    }
+                }
+                
+                return featured;
+            }
+
+            function checkDate(date) {
+                var today = new Date();
+                var date = new Date(date);
+                
+                return (today.getFullYear() == date.getFullYear()
+                        && today.getMonth() == date.getMonth() 
+                        && today.getDate() == date.getDate());
+            }
+
+            function checkType(type) {
+                var types = localStorage.types.split(";");
+                
+                for (var i = 0; i < types.length; i++) {
+                    var temp = types[i].split(":");
+                    
+                    if (temp[0] == type && temp[1] == "true") {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+
+            function exploitExists(link) {
+                for (x in exploits) {
+                    if (exploits[x]["link"] == link) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            function isFeatured(link) {
+                for (x in exploits) {
+                    if (exploits[x]["link"] == link) {
+                        if (exploits[x]["featured"] == true) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            function deleteExploit() {
+                for (var i = exploits.length - 1; i >= 0; i--) {
+                    if (exploits[i]["featured"] == false) {
+                        exploits.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            
+            function doCleaning() {
+                var count = exploits.length;
+                var todays = getTodaysCount();
+                
+                if (count > 5) {
+                    if (todays >= 5) { 
+                        while (count > todays) {
+                            deleteExploit();
+                            count = exploits.length;
+                        }
+                    } else {
+                        if (todays < 5) {
+                            while(count > 5) {
+                                deleteExploit();
+                                count = exploits.length;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function formatDate(string) {
+                var date = new Date(string);
+                
+                var year = date.getFullYear();
+                var month = date.getMonth() + 1;
+                var day = date.getDate();
+                
+                if (month < 10) {
+                    month = "0" + month;
+                }
+                
+                if (day < 10) {
+                    day = "0" + day;
+                }
+                
+                return year + "-" + month + "-" + day;
+            }
+            
+            function trimSpaces(string) {
+                return string.replace(/\s/g, "");
+            }
+
+            function formatTitle(string) {
+                return string.replace(/\[\w+\]\s\-\s/, "").replace(/[\n\r\f]/g, "");
+            }
+
+            function updateBadge() {
+                doCleaning();
+                var featured = getFeaturedCount();
+                
+                if (featured > 0) {
+                    chrome.browserAction.setBadgeText({text: featured + ""});
+                    chrome.browserAction.setTitle({title: featured + " new exploit" + ((featured > 1) ? "s": "")});
+                } else {
+                    chrome.browserAction.setBadgeText({text: ""});
+                    chrome.browserAction.setTitle({title: "No new exploits"});
+                }
+                
+                console.log("badge updated");
+            }
+        </script>
+    </head>
+    <body onload="init();">
+    </body>
+</html>
+

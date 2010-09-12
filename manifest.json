@@ -1,0 +1,18 @@
+{
+    "name": "The Exploit Database",
+    "version": "1.0.0",
+    "description": "The Exploit Database Extension - keep track of the latest exploits!",
+    "icons": { "16": "img/favicon.png",
+        "48": "img/logo_48.png",
+        "117": "img/logo.png" },
+    "background_page": "background.html",
+    "options_page": "options.html",
+    "browser_action": {
+        "default_icon": "img/favicon.png",
+        "popup": "popup.html"
+    },
+    "permissions": [
+		"tabs",
+        "http://www.exploit-db.com/*"
+    ]
+}

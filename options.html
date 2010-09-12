@@ -1,0 +1,118 @@
+<!--
+    The Exploit Database Extension for Google Chrome
+    Author: 10n1z3d <10n1z3d[at]w[dot]cn>
+    License: GPLv3
+-->
+
+<html>
+    <head>
+        <title>Options</title>
+        <link rel="stylesheet" href="css/options.css" type="text/css" />
+        <script type="text/javascript">
+            function loadOptions() {
+                if (localStorage.types != undefined) {
+                    var checked = localStorage.types.split(";");
+                    
+                    for (var i = 0; i < checked.length; i++) {
+                        var temp = checked[i].split(":");
+                        
+                        document.getElementById(temp[0]).checked = (temp[1] == "true") ? "checked": "";
+                    }
+                }
+                
+                document.getElementById("interval").value = localStorage.updateInterval;
+            }
+            
+            function saveOptions() {
+                var interval = parseInt(document.getElementById("interval").value);
+                
+                if (interval < 1 || isNaN(interval)) {
+                    alert("The entered value is invalid!");
+                } else {
+                    var checked = [];
+                    var count = 0;
+                    var checkboxes = document.getElementsByName("checkbox");
+                    
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        var cbxState = checkboxes[i].checked;
+                        checked[i] = checkboxes[i].id + ":" + cbxState;
+                        
+                        if (cbxState) {
+                            count++;
+                        }
+                    }
+                    
+                    if (count > 0) {
+                        localStorage.types = checked.join(";");
+                        alert("Your settings have been saved!");
+                    } else {
+                        alert("You should select at least one exploit type to keep track of!");
+                    }
+                    
+                    localStorage.updateInterval = interval;
+                }
+            }
+            
+            function openTab(url) {
+                chrome.tabs.create({url: url});
+            }
+        </script>
+    </head>
+    <body onload="loadOptions();">
+        <div id="wrapper">
+            <img src="img/logo_popup.png" id="logo" alt="The Exploit Database" title="The Exploit Database" onclick="openTab('http://www.exploit-db.com/');" />
+            <fieldset>
+                <legend>General</legend>
+                <table>
+                    <tr>
+                        <td class="label">
+                            <label for="interval">Update interval (minutes): </label>
+                        </td>
+                        <td>
+                            <input type="text" name="interval" id="interval" size="2" />
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+            <fieldset>
+                <legend>Exploits</legend>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label for="remote">Remote Exploits</label>
+                                <input type="checkbox" checked="checked" name="checkbox" id="remote" />
+                            </td>
+                            <td>
+                                <label for="web">Web Applications</label>
+                                <input type="checkbox" checked="checked" name="checkbox" id="webapps" />
+                            </td>
+                            <td>
+                                <label for="shellcode">Shellcode</label>
+                                <input type="checkbox" checked="checked" name="checkbox" id="shellcode" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="local">Local Exploits</label>
+                                <input type="checkbox" checked="checked" name="checkbox" id="local" />
+                            </td>
+                            <td>
+                                <label for="dos">DoS/PoC</label>
+                                <input type="checkbox" checked="checked" name="checkbox" id="dos" />
+                            </td>
+                            <td>
+                                <label for="papers">Papers</label>
+                                <input type="checkbox" checked="checked" name="checkbox" id="papers" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            <input type="button" class="save" value="Save" onclick="saveOptions();" />
+        </div>
+        <div id="donate">
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=UB6FBZQB5N2DL&lc=US&item_name=The%20Exploit%20Database%20Extension&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank"><img src="img/btn_donate.gif" alt="Donate" title="Donate" /></a>
+        </div>
+    </body>
+</html>
