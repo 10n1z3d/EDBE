@@ -1,7 +1,7 @@
 {
     "name": "The Exploit Database",
     "version": "1.0.0",
-    "description": "The Exploit Database Extension - keep track of the latest exploits!",
+    "description": "Keep track of the latest exploits, shellcode and papers!",
     "icons": { "16": "img/favicon.png",
         "48": "img/logo_48.png",
         "117": "img/logo.png" },
